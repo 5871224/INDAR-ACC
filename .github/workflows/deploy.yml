@@ -1,0 +1,28 @@
+name: Deploy to Ubuntu
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: acc-production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux, x64, acc-deploy]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Synchronize website files
+        run: |
+          mkdir -p /srv/web/acc
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            "$GITHUB_WORKSPACE/" /srv/web/acc/
